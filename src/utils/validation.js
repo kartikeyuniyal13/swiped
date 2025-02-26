@@ -2,7 +2,6 @@ const validator=require("validator")
 require("dotenv").config({ path: ".env.local" });
 
 const validateSignUpData=(req)=>{
-    console.log("val"+req.body)
     const {firstName,lastName,emailId,password}=req.body;
 
     if(!firstName||!lastName){

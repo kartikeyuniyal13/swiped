@@ -4,6 +4,7 @@ const mongoose=require('mongoose')
 const connectionRequestSchema= new mongoose.Schema({
     senderId:{
         type:mongoose.Schema.Types.ObjectId,
+        ref:"User",//reference the User document
         required: true,
     },
     receiverId:{

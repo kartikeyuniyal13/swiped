@@ -24,32 +24,42 @@ authRouter.post("/signup",async(req,res)=>{
    
 })
 
+authRouter.post("/login", async (req, res) => {
+    try {
+        const { emailId, password } = req.body;
 
-authRouter.post("/login",async(req,res)=>{
-    const {emailId,password}=req.body;
-    const user =await User.findOne({emailId:emailId})
+        if (!emailId || !password) {
+            return res.status(400).json({ error: "EmailId and Password both required" });
+        }
 
-    if(!user){
-        throw new Error("Invalid credentials")
+        const user = await User.findOne({ emailId: emailId });
+        if (!user) {
+            return res.status(401).json({ error: "Invalid credentials" });
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordValid) {
+            return res.status(401).json({ error: "Invalid credentials" });
+        }
+
+        const token = await jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+        res.cookie("token", token, {
+            expires: new Date(Date.now() + 8 * 360000),
+            httpOnly: true,
+        });
+
+        res.json({ message: "Login successful", user });
+    } catch (err) {
+        console.error("Login Error:", err.message);
+        res.status(500).json({ error: "Internal Server Error" });
     }
+});
 
-    const isPasswordValid=await bcrypt.compare(password,user.password)
-
-    if(isPasswordValid){
-        const token= await jwt.sign({_id:user._id},process.env.JWT_SECRET)
-        res.cookie("token",token,{
-            expires:new Date(Date.now()+8*360000),
-        })
-        res.send("Login successful!!!")
-    }else{
-        throw new Error("Invalid credentials")
-    }
-
-})
 
 authRouter.post('/logout',async (req,res)=>{
     res.cookie("token",null,{
-        expires:new Date(Data.now())
+        expires:new Date(Date.now())
     })
     res.send("Logout Successful!!")
 })

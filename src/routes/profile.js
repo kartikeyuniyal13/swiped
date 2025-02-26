@@ -9,11 +9,11 @@ require('dotenv').config({path:".env.local"})
 profileRouter.get('/profile/view',userAuth,(req,res)=>{
     try{
 
-       //.user property added by the userAuth to the req obj
+       //.user object added by the userAuth to the req obj
         const user=req.user;
-        req.send(user)
+        res.send(user)
     }catch(err){
-        res.status().send("Error :"+ err.message)
+        res.status(401).send("Error :"+ err.message)
     }
 
 })
@@ -22,6 +22,7 @@ profileRouter.get('/profile/view',userAuth,(req,res)=>{
 ////userAuth middleware check user loggedin or not
 profileRouter.patch('/profile/edit',userAuth,async(req,res)=>{
     try{
+        console.log("called")
         if(!validateEditProfileData(req)){
             //can mention which field caused the error
             throw new Error("Invalid Edit request!!")
@@ -36,7 +37,10 @@ profileRouter.patch('/profile/edit',userAuth,async(req,res)=>{
        })
        
        await user.save()
-       res.send(`${user.firstName},your profile was updated successfuly`)
+       res.json({
+        message:`${user.firstName},your profile is updated successfully`,
+        data:user
+       })
 
     }catch(err){
         res.status(400).send("Error"+err.message)
